@@ -1,6 +1,6 @@
-# Bible Study Command Line Interface
+# Bible Study CLI
 
-This app is for people like me who prefer to study their bible with a command-line-interface. I would appreciate suggestions of easy ways to make this more user-friendly.
+This command-line app is for people like me who prefer to study the bible with a command-line-interface. I would appreciate suggestions of easy ways to make this more user-friendly.
 
 If you prefer a free web interface, I recommend https://www.stepbible.org with the ESV translation.  Like this, there are no commentaries, but it has many easily viewed cross-references and Greek and Hebrew helps.
 
@@ -15,10 +15,11 @@ All Scripture quotations, unless otherwise indicated, are taken from The Holy Bi
 
 ### Examples:
 
-![Examples](https://joncrlsn.github.com/images/biblestudy-cli.png)
+![Examples](https://github.com/joncrlsn/biblestudy/raw/master/images/biblestudy-cli.png)
 
 
 ### To Do:
+* Add pre-compiled executables
 * Translate command: 
   * add cross references from openbible.info
   * add translation next to each strongs number.
