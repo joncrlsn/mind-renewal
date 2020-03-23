@@ -234,9 +234,9 @@ func printEnglishWithStrongs(text string, strongsMap string, isNewTestament bool
 	//fmt.Printf("MaxLineLength: %d\n", maxLineLength)
 	//fmt.Printf("Number of lines: %d\n", len(lines))
 
-	strongsPrefix := "H"
+	strongsPrefix := "h"
 	if isNewTestament {
-		strongsPrefix = "G"
+		strongsPrefix = "g"
 	}
 
 	// Left pad each line to the max line length.  This generates a Printf format to use.

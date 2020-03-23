@@ -93,9 +93,10 @@ func mainPrompt() {
 
 	// home, err := os.UserHomeDir()
 	if len(previousPassageRef) > 0 {
-		color.FgDarkGray.Printf("Current verse: %s  (t)ranslate or (s)how\n", previousPassageRef)
+		color.FgDarkGray.Printf("Current verse: %s", previousPassageRef)
+		color.Cyan.Println("  (t)ranslate or (s)how it again")
 	}
-	color.Cyan.Println("Enter verse reference, strongs# (i.e. G1234 or H5678), (p)roverb, (h)elp or (q)uit.")
+	color.Cyan.Println("Enter verse reference, strongs# (i.e. g1234 or h5678), (p)roverb, (h)elp or (q)uit.")
 	color.Cyan.Print("Command: ")
 	text, err := reader.ReadString('\n')
 	if err != nil {
