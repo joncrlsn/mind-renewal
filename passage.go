@@ -15,7 +15,6 @@ import (
 var (
 	verseRegexp            = regexp.MustCompile(`([0-9]*\s*[A-Za-z]+)\s*([0-9]+)[:.]?([0-9]*)`)
 	baseApiUrl             = "https://api.esv.org/v3/passage/text/"
-	apiToken               = "9f29b9475bd3e4b05765c06741cf4c094eef8a8a"
 	proverbsChapterLengths = []int{
 		33, 22, 35, 27, 23, 35, 27, 36, 18, 32,
 		31, 28, 25, 35, 33, 33, 28, 24, 29, 30,
@@ -47,6 +46,7 @@ func parseVerseRef(text string) (book string, chapterAndVerse string) {
 	return "", ""
 }
 
+// Print out the passage from the reference given
 func displayPassage(passageRef string, includeHeadings, includeFootnotes, indentPoetry, includeVerseNumbers bool) (cleanPassageRef string) {
 	passage, err := lookupVerse(passageRef, 80,
 		includeHeadings,

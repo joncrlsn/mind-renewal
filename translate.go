@@ -63,14 +63,14 @@ func translate(verseRef string) {
 
 		//fmt.Printf("book: '%s'\n", book)
 		//fmt.Printf("chapterVerse: '%s'\n", chapterVerse)
-		bookObj, ok := annotationsBookMap[bookTrimmed]
+		bookObj, ok := bookNameMap[bookTrimmed]
 		if !ok {
 			displayErrorText("Unable to find book with name " + bookTrimmed)
 			return
 		}
 		translationMapLookupString := bookObj.TranslationName + " " + chapterVerse
 		//translationMapLookupString := buildTranslationLookupString(passage.VerseRef)
-		isNewTestament := bookObj.NewTestament
+		isNewTestament := (bookObj.Testament == newTestament)
 
 		//fmt.Println("annotationLookupString:" + annotationLookupString)
 
@@ -246,9 +246,9 @@ func printEnglishWithStrongs(text string, strongsMap string, isNewTestament bool
 		tmpStrongs := strongsRegex.FindString(l)
 		english := l[:len(l)-len(tmpStrongs)]
 
-		// Convert tmpStrongs <1111> to G1111  (G is for Greek)
-		// Convert tmpStrongs <1111+2222> to G1111+G2222
-		// Convert tmpStrongs <1111>+<2222> to G1111+G2222
+		// Convert tmpStrongs <1111> to g1111  (G is for Greek)
+		// Convert tmpStrongs <1111+2222> to g1111+g2222
+		// Convert tmpStrongs <1111>+<2222> to g1111+g2222
 
 		// Find the individual strong's numbers in the string
 		strongsNumbers := numberRegex.FindAllString(tmpStrongs, -1)
@@ -263,7 +263,6 @@ func printEnglishWithStrongs(text string, strongsMap string, isNewTestament bool
 		fmt.Printf(format+"\n", english, tmpStrongs)
 	}
 
-	//fmt.Printf("(ESV)\n")
 	return nil
 }
 

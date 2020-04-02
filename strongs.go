@@ -55,6 +55,8 @@ func displayStrongs(text string, file string) {
 	}
 }
 
+// chooseLines returns only the lines that apply to the given strongs number.
+//
 // Example Lines:
 //
 // $$T0000003
@@ -65,7 +67,6 @@ func displayStrongs(text string, file string) {
 //  see HEBREW for 011
 // $$T0000004
 //
-// chooseLines returns the lines that apply to the given strongs number.
 func chooseLines(fileName string, strongsNum string) (<-chan string, error) {
 	c := make(chan string, 10)
 	strongsInt, err := strconv.Atoi(strongsNum)

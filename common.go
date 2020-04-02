@@ -22,174 +22,201 @@ THE SOFTWARE.
 package main
 
 import (
+	"strings"
+
 	"github.com/gookit/color"
 )
 
 var (
-	annotationsBookMap = map[string]Book{}
+	bookNameMap = map[string]Book{}
+
+	apiToken = "9f29b9475bd3e4b05765c06741cf4c094eef8a8a"
+
+	categoryAliases = map[string][]string{
+		"history":      []string{"history", "hist", "historical"},
+		"poetry":       []string{"poetry", "poet"},
+		"prophesy":     []string{"prophesy", "prophetic"},
+		"gospel":       []string{"gospel", "gospels"},
+		"epistle":      []string{"epistle", "epistles"},
+		"oldTestament": []string{"oldTestament", "ot", "old"},
+		"newTestament": []string{"newTestament", "nt", "new"},
+	}
+
+	// filters is a map keyed by a descriptor with multiple book.TranslationName values
+	// key can be a category or a testament name (old or new), or an alias name for the book.
+	filters map[string][]string = make(map[string][]string)
 )
 
+// Passage is the result of a Bible passage lookup
 type Passage struct {
 	VerseRef string   `json:"canonical"`
 	Passages []string `json:"passages"`
 }
 
+// Book represents a book of the Bible
 type Book struct {
 	FullName        string
 	TranslationName string
-	NewTestament    bool
-	Permutations    []string
+	Testament       Testament
+	Category        BookCategory
+	Aliases         []string
 }
 
+// BookCategory is the classification type of the book
+type BookCategory int
+
+func (category BookCategory) String() string {
+	classNames := [...]string{
+		"law",
+		"history",
+		"poetry",
+		"prophesy",
+		"gospel",
+		"epistle",
+	}
+	if category < law || category > epistle {
+		return "Unknown"
+	}
+	return classNames[category]
+}
+
+// Testament is described as either old or new
+type Testament int
+
+func (t Testament) String() string {
+	if t == oldTestament {
+		return "oldTestament"
+	} else if t == newTestament {
+		return "newTestament"
+	} else {
+		return "unknown"
+	}
+}
+
+//
+// https://biblewithann.wordpress.com/2013/10/21/divisions-classifications-of-bible-books/
+//
+const (
+	law          BookCategory = iota
+	history      BookCategory = iota
+	poetry       BookCategory = iota
+	prophesy     BookCategory = iota
+	gospel       BookCategory = iota
+	epistle      BookCategory = iota
+	oldTestament Testament    = iota
+	newTestament Testament    = iota
+)
+
+var ()
+
 func init() {
+
 	for _, book := range books {
-		annotationsBookMap[book.FullName] = book
+		bookNameMap[book.FullName] = book
+		for _, aliasName := range book.Aliases {
+			bookNameMap[aliasName] = book
+			filters[aliasName] = append(filters[aliasName], book.TranslationName)
+		}
+
+		// Add the TranslationName of the book to the slices for each alias of the Testament
+		for _, alias := range categoryAliases[book.Testament.String()] {
+			filters[alias] = append(filters[alias], book.TranslationName)
+		}
+
+		// Add the TranslationName of the book to the slices for each alias of the BookClass
+		filters[book.Category.String()] = append(filters[book.Category.String()], book.TranslationName)
+		for _, alias := range categoryAliases[book.Category.String()] {
+			filters[alias] = append(filters[alias], book.TranslationName)
+		}
+
+		// Make sure the full name is represented as a key in the filters map
+		key := strings.ToLower(book.FullName)
+		filters[key] = append(filters[key], book.TranslationName)
 	}
 }
 
 // books is used for the translate command.
 var books = []Book{
-	Book{"Genesis", "Gen", false, []string{}},
-	Book{"Exodus", "Exo", false, []string{}},
-	Book{"Leviticus", "Lev", false, []string{}},
-	Book{"Numbers", "Num", false, []string{}},
-	Book{"Deuteronomy", "Deu", false, []string{}},
-	Book{"Joshua", "Jos", false, []string{}},
-	Book{"Judges", "Jdg", false, []string{}},
-	Book{"Ruth", "Rut", false, []string{}},
-	Book{"1 Samuel", "1Sa", false, []string{}},
-	Book{"2 Samuel", "2Sa", false, []string{}},
-	Book{"1 Kings", "1Ki", false, []string{}},
-	Book{"2 Kings", "2Ki", false, []string{}},
-	Book{"1 Chronicles", "1Ch", false, []string{}},
-	Book{"2 Chronicles", "2Ch", false, []string{}},
-	Book{"Ezra", "Ezr", false, []string{}},
-	Book{"Nehemiah", "Neh", false, []string{}},
-	Book{"Esther", "Est", false, []string{}},
-	Book{"Job", "Job", false, []string{}},
-	Book{"Psalm", "Psa", false, []string{}},
-	Book{"Psalms", "Psa", false, []string{}},
-	Book{"Proverbs", "Pro", false, []string{}},
-	Book{"Ecclesiastes", "Ecc", false, []string{}},
-	Book{"Song of Solomon", "Song", false, []string{}},
-	Book{"Song of Songs", "Song", false, []string{}},
-	Book{"Isaiah", "Isa", false, []string{}},
-	Book{"Jeremiah", "Jer", false, []string{}},
-	Book{"Lamentations", "Lam", false, []string{}},
-	Book{"Ezekiel", "Ezek", false, []string{}},
-	Book{"Daniel", "Dan", false, []string{}},
-	Book{"Hosea", "Hos", false, []string{}},
-	Book{"Joel", "Joel", false, []string{}},
-	Book{"Amos", "Amo", false, []string{}},
-	Book{"Obadiah", "Oba", false, []string{}},
-	Book{"Jonah", "Jon", false, []string{}},
-	Book{"Micah", "Mic", false, []string{}},
-	Book{"Nahum", "Nah", false, []string{}},
-	Book{"Habakkuk", "Hab", false, []string{}},
-	Book{"Zephaniah", "Zep", false, []string{}},
-	Book{"Haggai", "Hag", false, []string{}},
-	Book{"Zechariah", "Zec", false, []string{}},
-	Book{"Malachi", "Mal", false, []string{}},
-	Book{"Matthew", "Mat", true, []string{}},
-	Book{"Mark", "Mrk", true, []string{}},
-	Book{"Luke", "Luk", true, []string{}},
-	Book{"John", "Jhn", true, []string{}},
-	Book{"Acts", "Act", true, []string{}},
-	Book{"Romans", "Rom", true, []string{}},
-	Book{"1 Corinthians", "1Co", true, []string{}},
-	Book{"2 Corinthians", "2Co", true, []string{}},
-	Book{"Galatians", "Gal", true, []string{}},
-	Book{"Ephesians", "Eph", true, []string{}},
-	Book{"Philippians", "Php", true, []string{}},
-	Book{"Colossians", "Col", true, []string{}},
-	Book{"1 Thessalonians", "1Th", true, []string{}},
-	Book{"2 Thessalonians", "2Th", true, []string{}},
-	Book{"1 Timothy", "1Ti", true, []string{}},
-	Book{"2 Timothy", "2Ti", true, []string{}},
-	Book{"Titus", "Tit", true, []string{}},
-	Book{"Philemon", "Phm", true, []string{}},
-	Book{"Hebrews", "Heb", true, []string{}},
-	Book{"James", "Jas", true, []string{}},
-	Book{"1 Peter", "1Pe", true, []string{}},
-	Book{"2 Peter", "2Pe", true, []string{}},
-	Book{"1 John", "1Jn", true, []string{}},
-	Book{"2 John", "2Jn", true, []string{}},
-	Book{"3 John", "3Jn", true, []string{}},
-	Book{"Jude", "Jud", true, []string{}},
-	Book{"Revelation", "Rev", true, []string{}},
+	Book{"Genesis", "Gen", oldTestament, law, []string{"gen"}},
+	Book{"Exodus", "Exo", oldTestament, law, []string{"ex", "exo"}},
+	Book{"Leviticus", "Lev", oldTestament, law, []string{"lev"}},
+	Book{"Numbers", "Num", oldTestament, law, []string{"nu", "num", "numb"}},
+	Book{"Deuteronomy", "Deu", oldTestament, law, []string{"deu", "deut"}},
+	Book{"Joshua", "Jos", oldTestament, history, []string{"jos", "josh"}},
+	Book{"Judges", "Jdg", oldTestament, history, []string{"jdg", "judg"}},
+	Book{"Ruth", "Rut", oldTestament, history, []string{"ru", "rut"}},
+	Book{"1 Samuel", "1Sa", oldTestament, history, []string{"1sa", "1sam"}},
+	Book{"2 Samuel", "2Sa", oldTestament, history, []string{"2sa", "2sam"}},
+	Book{"1 Kings", "1Ki", oldTestament, history, []string{"1ki", "1kin", "1king"}},
+	Book{"2 Kings", "2Ki", oldTestament, history, []string{"2ki", "2kin", "2king"}},
+	Book{"1 Chronicles", "1Ch", oldTestament, history, []string{"1chro", "1chron"}},
+	Book{"2 Chronicles", "2Ch", oldTestament, history, []string{"2chro", "2chron"}},
+	Book{"Ezra", "Ezr", oldTestament, history, []string{"ez", "ezr"}},
+	Book{"Nehemiah", "Neh", oldTestament, history, []string{"ne", "neh"}},
+	Book{"Esther", "Est", oldTestament, history, []string{"es", "est", "esth"}},
+	Book{"Job", "Job", oldTestament, poetry, []string{}},
+	//	Book{"Psalm", "Psa", oldTestament, poetry, []string{"Ps", "Psalms"}},
+	Book{"Psalms", "Psa", oldTestament, poetry, []string{"ps", "psa", "psalm"}},
+	Book{"Proverbs", "Pro", oldTestament, poetry, []string{"pr", "pro", "prov"}},
+	Book{"Ecclesiastes", "Ecc", oldTestament, poetry, []string{"ecc", "ec", "eccles"}},
+	Book{"Song of Solomon", "Song", oldTestament, poetry, []string{"song", "song of songs"}},
+	//	Book{"Song of Songs", "Song", oldTestament, poetry, []string{}},
+	Book{"Isaiah", "Isa", oldTestament, prophesy, []string{"is", "isa"}},
+	Book{"Jeremiah", "Jer", oldTestament, prophesy, []string{"je", "jer", "jere"}},
+	Book{"Lamentations", "Lam", oldTestament, prophesy, []string{"la", "lam", "lamen"}},
+	Book{"Ezekiel", "Ezek", oldTestament, prophesy, []string{"ezek"}},
+	Book{"Daniel", "Dan", oldTestament, prophesy, []string{"dan"}},
+	Book{"Hosea", "Hos", oldTestament, prophesy, []string{"hos"}},
+	Book{"Joel", "Joel", oldTestament, prophesy, []string{"joe"}},
+	Book{"Amos", "Amo", oldTestament, prophesy, []string{"am", "amo"}},
+	Book{"Obadiah", "Oba", oldTestament, prophesy, []string{"ob", "oba"}},
+	Book{"Jonah", "Jon", oldTestament, prophesy, []string{"jon"}},
+	Book{"Micah", "Mic", oldTestament, prophesy, []string{"mic"}},
+	Book{"Nahum", "Nah", oldTestament, prophesy, []string{"na", "nah"}},
+	Book{"Habakkuk", "Hab", oldTestament, prophesy, []string{"hab"}},
+	Book{"Zephaniah", "Zep", oldTestament, prophesy, []string{"zep", "zeph", "zef"}},
+	Book{"Haggai", "Hag", oldTestament, prophesy, []string{"hag", "hagg"}},
+	Book{"Zechariah", "Zec", oldTestament, prophesy, []string{"zec", "zech", "zek"}},
+	Book{"Malachi", "Mal", oldTestament, prophesy, []string{"mal"}},
+	Book{"Matthew", "Mat", newTestament, gospel, []string{"mat", "matt"}},
+	Book{"Mark", "Mrk", newTestament, gospel, []string{"mrk", "mar"}},
+	Book{"Luke", "Luk", newTestament, gospel, []string{"lu", "luk"}},
+	Book{"John", "Jhn", newTestament, gospel, []string{"joh", "jhn"}},
+	Book{"Acts", "Act", newTestament, history, []string{"ac", "act"}},
+	Book{"Romans", "Rom", newTestament, epistle, []string{"ro", "rom"}},
+	Book{"1 Corinthians", "1Co", newTestament, epistle, []string{"1co", "1cor"}},
+	Book{"2 Corinthians", "2Co", newTestament, epistle, []string{"2co", "2cor"}},
+	Book{"Galatians", "Gal", newTestament, epistle, []string{"gal"}},
+	Book{"Ephesians", "Eph", newTestament, epistle, []string{"eph"}},
+	Book{"Philippians", "Php", newTestament, epistle, []string{"php"}},
+	Book{"Colossians", "Col", newTestament, epistle, []string{"col", "colo"}},
+	Book{"1 Thessalonians", "1Th", newTestament, epistle, []string{"1th", "1the", "1thess"}},
+	Book{"2 Thessalonians", "2Th", newTestament, epistle, []string{"2th", "2the", "2thess"}},
+	Book{"1 Timothy", "1Ti", newTestament, epistle, []string{"1ti", "1tim"}},
+	Book{"2 Timothy", "2Ti", newTestament, epistle, []string{"2ti", "2tim"}},
+	Book{"Titus", "Tit", newTestament, epistle, []string{"tit"}},
+	Book{"Philemon", "Phm", newTestament, epistle, []string{"phm", "philem"}},
+	Book{"Hebrews", "Heb", newTestament, epistle, []string{"heb"}},
+	Book{"James", "Jas", newTestament, epistle, []string{"jam", "jas", "jame"}},
+	Book{"1 Peter", "1Pe", newTestament, epistle, []string{"1pe", "1pet"}},
+	Book{"2 Peter", "2Pe", newTestament, epistle, []string{"2pe", "2pet"}},
+	Book{"1 John", "1Jn", newTestament, epistle, []string{"1jn", "1jo", "1joh"}},
+	Book{"2 John", "2Jn", newTestament, epistle, []string{"2jn", "2jo", "2joh"}},
+	Book{"3 John", "3Jn", newTestament, epistle, []string{"3jn", "3jo", "3joh"}},
+	Book{"Jude", "Jud", newTestament, epistle, []string{"jud"}},
+	Book{"Revelation", "Rev", newTestament, prophesy, []string{"rev", "revel"}},
 }
 
-// annotationsBookMap is used for the translate command.
-//var annotationsBookMap = map[string]Book{
-// "Genesis":         "Gen",
-// "Exodus":          "Exo",
-// "Leviticus":       "Lev",
-// "Numbers":         "Num",
-// "Deuteronomy":     "Deu",
-// "Joshua":          "Jos",
-// "Judges":          "Jdg",
-// "Ruth":            "Rut",
-// "1 Samuel":        "1Sa",
-// "2 Samuel":        "2Sa",
-// "1 Kings":         "1Ki",
-// "2 Kings":         "2Ki",
-// "1 Chronicles":    "1Ch",
-// "2 Chronicles":    "2Ch",
-// "Ezra":            "Ezr",
-// "Nehemiah":        "Neh",
-// "Esther":          "Est",
-// "Job":             "Job",
-// "Psalm":           "Psa",
-// "Psalms":          "Psa",
-// "Proverbs":        "Pro",
-// "Ecclesiastes":    "Ecc",
-// "Song of Solomon": "Song",
-// "Song of Songs":   "Song",
-// "Isaiah":          "Isa",
-// "Jeremiah":        "Jer",
-// "Lamentations":    "Lam",
-// "Ezekiel":         "Ezek",
-// "Daniel":          "Dan",
-// "Hosea":           "Hos",
-// "Joel":            "Joel",
-// "Amos":            "Amo",
-// "Obadiah":         "Oba",
-// "Jonah":           "Jon",
-// "Micah":           "Mic",
-// "Nahum":           "Nah",
-// "Habakkuk":        "Hab",
-// "Zephaniah":       "Zep",
-// "Haggai":          "Hag",
-// "Zechariah":       "Zec",
-// "Malachi":         "Mal",
-// "Matthew":         "Mat",
-// "Mark":            "Mrk",
-// "Luke":            "Luk",
-// "John":            "Jhn",
-// "Acts":            "Act",
-// "Romans":          "Rom",
-// "1 Corinthians":   "1Co",
-// "2 Corinthians":   "2Co",
-// "Galatians":       "Gal",
-// "Ephesians":       "Eph",
-// "Philippians":     "Php",
-// "Colossians":      "Col",
-// "1 Thessalonians": "1Th",
-// "2 Thessalonians": "2Th",
-// "1 Timothy":       "1Ti",
-// "2 Timothy":       "2Ti",
-// "Titus":           "Tit",
-// "Philemon":        "Phm",
-// "Hebrews":         "Heb",
-// "James":           "Jas",
-// "1 Peter":         "1Pe",
-// "2 Peter":         "2Pe",
-// "1 John":          "1Jn",
-// "2 John":          "2Jn",
-// "3 John":          "3Jn",
-// "Jude":            "Jud",
-// "Revelation":      "Rev",
-//}
+// DELETEME
+func appendStringSliceMap(aMap map[string][]string, key string, value string) {
+	// _, present := filters[key]
+	// if !present {
+	// 	newSlice := make([]string, 10)
+	// 	filters[key] = newSlice
+	// }
+	aMap[key] = append(aMap[key], value)
+
+}
 
 // displayErrorText writes an error message
 func displayErrorText(message string) {
