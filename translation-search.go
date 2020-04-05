@@ -36,21 +36,121 @@ var (
 // searchStrongsWord finds verses that use the specified strongs word
 // The input string will look something like this:
 // g4982 search gospels
-// h4982 search otHistory
-func searchStrongsWord(searchString string) {
+// h4982 search history
+func searchStrongsWord(searchString string) error {
 	// Convert 1 Kings to 1Kings, 2 Peter to 2Peter, etc.
 	searchString = numberedBookRegex.ReplaceAllString(searchString, "$1$2")
 
 	// Convert "old testament" to "old"
 	searchString = testamentRegex.ReplaceAllString(searchString, "$1")
+
 	// Split string on one or more whitespace chars
 	words := strings.Fields(searchString)
+	strongsWord := words[0] //
 
-	bookNames := findBooksMatchingWords(words[2:])
-
-	if debug {
-		fmt.Printf("Would search strongs %s in these books: %v\n", words[0], bookNames)
+	var allBooks = true
+	var bookNames *[]string
+	if len(words) > 2 {
+		//
+		// Find the book names that we'll use to limit the search results
+		//
+		allBooks = false
+		bookNames = findBooksMatchingWords(words[2:])
+		debug("Searching strongs %s in these books: %v\n", words[0], bookNames)
 	}
+
+	//
+	// Traverse the translation file looking for verses that use the given strongsWord
+	// The translation file has lines  that look like this:
+	// $Gen 2:11 02=<08034> 05=<00259> 08=<06376> 09=<01931> ...
+	//
+
+	strongsNumber := strongsWord[1:] // Remove the prefix: "g" or "h"
+
+	// Greek Strongs words have 4 digits, Hebrew has 5 digits (left-zero padded)
+	var format = "[<+]%04s[+>]" // greek is the default (4 digits)
+	if strings.HasPrefix(strongsWord, "h") {
+		format = "[<+]%05s[+>]" // switch to 5 digits
+	}
+
+	lookupRegex := regexp.MustCompile(fmt.Sprintf(format, strongsNumber))
+	// Grep the file
+	c, err := grep(translationMapFile, lookupRegex)
+	if err != nil {
+		displayErrorText(fmt.Sprintf("Unable to read file: %s, %v\n", translationMapFile, err))
+		return err
+	}
+
+	var bookPattern *regexp.Regexp
+	if !allBooks {
+		// Pattern is a regular expression that contains all the book names we are allowing in our search
+		patternStr := `^\$(` + strings.Join(*bookNames, "|") + `) `
+		bookPattern, err = regexp.Compile(patternStr)
+		if err != nil {
+			displayError("Error compiling regex "+patternStr, err)
+			return err
+		}
+		debug("Regex of book names to limit search results: %v\n", patternStr)
+	}
+
+	var verses []string
+	for line := range c {
+		// If the pattern matches then we can accept this line
+		if allBooks || bookPattern.MatchString(line) {
+			// The verse reference is the first part of the line until the first tab
+			tabIx := strings.Index(line, "\t")
+			verses = append(verses, line[1:tabIx])
+		}
+	}
+
+	debug("Found %d verses %v\n", len(verses), verses)
+
+	if len(verses) > 20 {
+		fmt.Printf("Showing only 20 of %d verses found.\n", len(verses))
+		verses = verses[:19]
+	}
+
+	// TODO:  Allow user to page through results
+
+	//
+	// Lookup all the verses that use the given strongs number
+	//
+
+	versesLookupString := strings.Join(verses, ";")
+	//versesLookupString = strings.ReplaceAll(versesLookupString, ":", ".")
+	//versesLookupString = strings.ReplaceAll(versesLookupString, " ", "")
+	debug("Verses lookup string: %s\n", versesLookupString)
+	passage, err := lookupVerse(versesLookupString, 0,
+		false, /*includeHeadings*/
+		false, /*includeFootnotes*/
+		false, /*indentPoetry*/
+		false /*includeVerseNumbers*/)
+	if err != nil {
+		displayError("Error looking up verse", err)
+		return err
+	}
+
+	debug("Passage: %v\n", passage)
+
+	//
+	// Print out the passages we found
+	//
+
+	found := false
+	newLineRegex := regexp.MustCompile(`[\n]`)
+	for _, passageText := range passage.Passages {
+		// Put verse on one line
+		newText := newLineRegex.ReplaceAllString(passageText, " ")
+		newText = strings.ReplaceAll(newText, "(ESV)", "")
+		fmt.Println(newText)
+		found = true
+	}
+	if found {
+		fmt.Println("(ESV)")
+	}
+	fmt.Println()
+
+	return nil
 }
 
 //
@@ -63,31 +163,21 @@ func findBooksMatchingWords(words []string) *[]string {
 	// See Book.TranslationName
 	var keepBooks []string
 
-	// strongsWord := words[0]
-	// filters := []string{}
-	// Start at the 3rd word
 	for _, word := range words {
 		books, present := filters[word]
-		if debug {
-			fmt.Printf("=== filtering on word %s  found: %t\n", word, present)
-		}
+		debug("=== filtering on word %s  valid: %t\n", word, present)
 		if !present {
-			if debug {
-				fmt.Println(word, "not found")
-			}
 			continue
 		}
 		if len(keepBooks) == 0 {
 			// This is the first found word
-			// Copy books into keepBooks
 			keepBooks = make([]string, len(books))
-			// We will be changing books so we don't want a reference to books2
+			// Copy books into keepBooks
 			copy(keepBooks, books)
+
 		} else {
 
-			// books := []int{1, 2, 3, 5}
-			// books2 := []int{2, 3, 4, 8, 10, 19}
-			// Remove all books not in books2
+			// Find the intersection of keepBooks and books
 			tempKeep := []string{}
 			for _, b := range keepBooks {
 				for _, b2 := range books {
@@ -99,12 +189,10 @@ func findBooksMatchingWords(words []string) *[]string {
 				}
 			}
 			keepBooks = tempKeep
+		}
 
-		}
-		if debug {
-			fmt.Printf("After %s, keepBooks is now length %d\n", word, len(keepBooks))
-			fmt.Printf("books: %v\n", keepBooks)
-		}
+		debug("After %s, keepBooks is now length %d\n", word, len(keepBooks))
+		debug("books: %v\n", keepBooks)
 
 		if len(keepBooks) == 0 {
 			// If it's zero at this point, there is no point in going further

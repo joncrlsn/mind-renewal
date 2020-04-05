@@ -22,9 +22,24 @@ THE SOFTWARE.
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gookit/color"
+)
+
+//
+// https://biblewithann.wordpress.com/2013/10/21/divisions-classifications-of-bible-books/
+//
+const (
+	law          BookCategory = iota
+	history      BookCategory = iota
+	poetry       BookCategory = iota
+	prophesy     BookCategory = iota
+	gospel       BookCategory = iota
+	epistle      BookCategory = iota
+	oldTestament Testament    = iota
+	newTestament Testament    = iota
 )
 
 var (
@@ -43,7 +58,7 @@ var (
 	}
 
 	// filters is a map keyed by a descriptor with multiple book.TranslationName values
-	// key can be a category or a testament name (old or new), or an alias name for the book.
+	// key can be a category or a testament name (old or new), or an alias name for a book.
 	filters map[string][]string = make(map[string][]string)
 )
 
@@ -93,22 +108,6 @@ func (t Testament) String() string {
 	}
 }
 
-//
-// https://biblewithann.wordpress.com/2013/10/21/divisions-classifications-of-bible-books/
-//
-const (
-	law          BookCategory = iota
-	history      BookCategory = iota
-	poetry       BookCategory = iota
-	prophesy     BookCategory = iota
-	gospel       BookCategory = iota
-	epistle      BookCategory = iota
-	oldTestament Testament    = iota
-	newTestament Testament    = iota
-)
-
-var ()
-
 func init() {
 
 	for _, book := range books {
@@ -120,11 +119,12 @@ func init() {
 
 		// Add the TranslationName of the book to the slices for each alias of the Testament
 		for _, alias := range categoryAliases[book.Testament.String()] {
-			filters[alias] = append(filters[alias], book.TranslationName)
+			lowerAlias := strings.ToLower(alias)
+			filters[lowerAlias] = append(filters[lowerAlias], book.TranslationName)
 		}
 
 		// Add the TranslationName of the book to the slices for each alias of the BookClass
-		filters[book.Category.String()] = append(filters[book.Category.String()], book.TranslationName)
+		//filters[book.Category.String()] = append(filters[book.Category.String()], book.TranslationName)
 		for _, alias := range categoryAliases[book.Category.String()] {
 			filters[alias] = append(filters[alias], book.TranslationName)
 		}
@@ -224,6 +224,13 @@ func displayErrorText(message string) {
 }
 
 // displayError writes an error message
-func displayError(err error) {
-	color.Red.Println(err)
+func displayError(message string, err error) {
+	color.Red.Printf("%s: %v\n", message, err)
+}
+
+// debug only prints if the debugFlag is true
+func debug(format string, a ...interface{}) {
+	if debugFlag {
+		fmt.Printf("DEBUG: "+format, a...)
+	}
 }

@@ -14,7 +14,7 @@ import (
 
 var (
 	verseRegexp            = regexp.MustCompile(`([0-9]*\s*[A-Za-z]+)\s*([0-9]+)[:.]?([0-9]*)`)
-	baseApiUrl             = "https://api.esv.org/v3/passage/text/"
+	baseApiURL             = "https://api.esv.org/v3/passage/text/"
 	proverbsChapterLengths = []int{
 		33, 22, 35, 27, 23, 35, 27, 36, 18, 32,
 		31, 28, 25, 35, 33, 33, 28, 24, 29, 30,
@@ -54,7 +54,7 @@ func displayPassage(passageRef string, includeHeadings, includeFootnotes, indent
 		indentPoetry,
 		includeVerseNumbers)
 	if err != nil {
-		displayError(err)
+		displayError("Error looking up verse: ", err)
 		return
 	}
 
@@ -88,7 +88,7 @@ func lookupVerse(verseRef string, lineLength int, includeHeadings, includeFootno
 	urlSafeVerseRef := strings.ReplaceAll(verseRef, " ", "+")
 
 	url := fmt.Sprintf(`%s?q=%s&line-length=%d&include-headings=%t&include-footnotes=%t&indent-poetry=%t&include-verse-numbers=%t`,
-		baseApiUrl,
+		baseApiURL,
 		urlSafeVerseRef,
 		lineLength,
 		includeHeadings,

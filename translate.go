@@ -22,9 +22,7 @@ THE SOFTWARE.
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -47,7 +45,7 @@ func translate(verseRef string) {
 		false, /*indentPoetry*/
 		true /*includeVerseNumbers*/)
 	if err != nil {
-		displayError(err)
+		displayError("Error looking up verse "+verseRef, err)
 		return
 	}
 
@@ -89,7 +87,7 @@ func translate(verseRef string) {
 		//
 		lookupRegex, err := regexp.Compile("^[$]" + translationMapLookupString + "\t")
 		if err != nil {
-			displayError(err)
+			displayError("Error compiling regex", err)
 		}
 
 		// Grep the file
@@ -264,27 +262,4 @@ func printEnglishWithStrongs(text string, strongsMap string, isNewTestament bool
 	}
 
 	return nil
-}
-
-// grep reads a file line by line and adds to the channel only lines
-// that match the given regexp.
-func grep(fileName string, regex *regexp.Regexp) (<-chan string, error) {
-	c := make(chan string, 10)
-	file, err := os.Open(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			if regex.Match(scanner.Bytes()) {
-				c <- scanner.Text()
-			}
-		}
-		close(c)
-	}()
-
-	return c, nil
 }

@@ -38,7 +38,7 @@ func displayStrongs(text string, file string) {
 	// Grep the appropriate lines from the file
 	c, err := chooseLines(file, text)
 	if err != nil {
-		displayError(err)
+		displayError("Error reading lines from "+file, err)
 		os.Exit(1)
 	}
 

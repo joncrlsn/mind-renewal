@@ -1,3 +1,24 @@
+/*
+Copyright © 2020 Jon Carlson <joncrlsn@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
 package main
 
 //
@@ -38,7 +59,7 @@ var (
 	strongsGreekFile   string
 	strongsHebrewFile  string
 
-	debug bool
+	debugFlag bool
 )
 
 func init() {
@@ -117,15 +138,14 @@ func mainPrompt() {
 
 	// Try again if no data was entered
 	if len(text) == 0 {
-		displayErrorText("Nothing entered.")
 		return
 	}
 
 	// Shall we turn debug on/off?
 	isDebug, _ := regexp.MatchString(`^debug\s+(on|off)\s*$`, text)
 	if isDebug {
-		debug = strings.Contains(text, "on")
-		fmt.Printf("Set debug to %t\n", debug)
+		debugFlag = strings.Contains(text, "on")
+		fmt.Printf("Set debug to %t\n", debugFlag)
 		return
 	}
 
@@ -171,12 +191,11 @@ func mainPrompt() {
 	strongsSearch, _ := regexp.MatchString(`^[gh]\d+ .*search`, text)
 	if strongsSearch {
 		searchStrongsWord(text)
-		displayErrorText("Searching on strongs number is not yet implemented.")
 		return
 	}
 
 	// Translate the latest verse to strongs numbers
-	translatePrev, _ := regexp.MatchString(`^(t|tr|tra|tran|trans|translate)$`, text)
+	translatePrev, _ := regexp.MatchString(`^(t|tr|tran|trans|translate)$`, text)
 	if translatePrev {
 		if len(previousPassageRef) == 0 {
 			displayErrorText("You have not looked up a verse to translate.")
@@ -202,9 +221,19 @@ func mainPrompt() {
 	}
 
 	// Show a random proverb
-	proverb, _ := regexp.MatchString(`^(p|pr|pro|prov|proverb|proverbs)$`, text)
+	proverb, _ := regexp.MatchString(`^(p|prov|proverb|proverbs)$`, text)
 	if proverb {
 		previousPassageRef = randomProverb()
+		return
+	}
+
+	// Show a random declaration.
+	// A declaration is a biblical truth or verse that you have reworded to help you
+	// internalize it as applying directly to you.
+	// i.e.
+	declaration, _ := regexp.MatchString(`^(d|declaration)$`, text)
+	if declaration {
+		displayRandomDeclaration()
 		return
 	}
 
@@ -230,14 +259,15 @@ func printHelpMainPrompt() {
 	fmt.Println("Need Help?  You can enter:")
 	fmt.Println("  - a verse (like Ps3.3 or James 4:11)")
 	fmt.Println("  - (t)ranslate the latest verse requested")
-	fmt.Println("  - (s)how text for the latest reference again")
-	fmt.Println("  - (search) - uses the ESV API to search for the given words")
-	fmt.Println("             - may not return all matches")
-	fmt.Println("             - use quotes around phrases to limit search results")
-	fmt.Println("  - (d)eclaration - WIP - displays a random line from your declarations file")
+	fmt.Println("  - (s)how text for the latest verse again")
+	fmt.Println("  - search rabble - search for the given word 'rabble'")
+	fmt.Println("                  - may not return all matches if too many verses")
+	fmt.Println("                  - use quotes around phrases to limit search results")
 	fmt.Println("  - a strongs number prefixed by 'g' (for greek)   e.g. g2222")
 	fmt.Println("  - a strongs number prefixed by 'h' (for hebrew)  e.g. h5555")
+	fmt.Println("  - <strongs-num> search epistles    - searches on strongs num")
 	fmt.Println("  - (p)roverb prints a random proverb")
+	fmt.Println("  - (d)eclaration - WIP - displays a random line from your declarations file")
 	fmt.Println("  - (q)uit or e(x)it")
 	fmt.Println()
 	fmt.Println("Examples:")
