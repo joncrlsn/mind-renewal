@@ -13,6 +13,16 @@ For most people, instead of this app, I would recommend the free https://www.ste
 * Display declarations, which are verses that you have personalized to help you renew your mind to the truths inside.
 * Print your declarations for offline review and study.
 
+## Declarations
+
+A declaration is a verse that you have personalized to help you renew your mind.  For example, Philippians 3:7 says 
+
+    "But whatever gain I had, I counted as loss for the sake of Christ." 
+
+and I personalized it as a declaration with: 
+
+    "I count as a loss the things that I once thought mattered."
+
 All Scripture quotations, unless otherwise indicated, are taken from The Holy Bible, English Standard Version. Copyright ©2001 by Crossway Bibles, a publishing ministry of Good News Publishers.
 
 ## Data comes from

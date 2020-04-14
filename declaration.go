@@ -36,15 +36,21 @@ import (
 	wordwrap "github.com/mitchellh/go-wordwrap"
 )
 
-const declarationsFileName = "/keybase/private/joncrlsn/declarations"
-const lineWidth = 35
+const (
+	declarationLineWidth    = 37
+	declarationsPdfFilename = "declarations.pdf"
+	declarationsFilename    = "/keybase/private/joncrlsn/declarations"
+)
 
+// referenceRegex expects the declaration to end with a period followed
+// by one or more spaces and then a dash.
+// i.e.  I stand in grace.  - Rom 5:2
 var referenceRegex = regexp.MustCompile(`\.\s+-`)
 
 // displayRandomDeclaration assumes a file with a declaration per line.
 func displayRandomDeclaration() {
 
-	line, err := grepRandom(declarationsFileName)
+	line, err := grepRandom(declarationsFilename)
 	if err != nil {
 		displayError("Error reading declarations file", err)
 	}
@@ -56,8 +62,9 @@ func displayRandomDeclaration() {
 	//     - 1 John 5:18
 	line = referenceRegex.ReplaceAllString(line, ".\n    -")
 
-	border := strings.Repeat("=", lineWidth)
-	wrapped := wordwrap.WrapString(line, lineWidth)
+	// Now add a border and wrap the lines at the given length
+	border := strings.Repeat("=", declarationLineWidth)
+	wrapped := wordwrap.WrapString(line, declarationLineWidth)
 	fmt.Println(border)
 	fmt.Println(wrapped)
 	fmt.Println(border)

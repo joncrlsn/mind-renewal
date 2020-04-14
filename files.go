@@ -34,6 +34,7 @@ func grepRandom(fileName string) (string, error) {
 	for scanner.Scan() {
 		randomInt := rand.Intn(1000)
 		if randomInt > maxInt {
+			// We have a new line
 			line = scanner.Text()
 			maxInt = randomInt
 		}

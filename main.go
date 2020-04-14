@@ -237,6 +237,17 @@ func mainPrompt() {
 		return
 	}
 
+	// Print all the declarations to a PDF file
+	// pd=print declarations or pdf=pdf
+	generatePdf, _ := regexp.MatchString(`^(pd|pdf)$`, text)
+	if generatePdf {
+		err := GeneratePdf(declarationsFilename, declarationsPdfFilename)
+		if err != nil {
+			displayError("Error:", err)
+		}
+		return
+	}
+
 	// Assume this is a verse reference
 	showVerse(text)
 }
@@ -257,18 +268,19 @@ func showVerse(verseRef string) {
 
 func printHelpMainPrompt() {
 	fmt.Println("Need Help?  You can enter:")
-	fmt.Println("  - a verse (like Ps3.3 or James 4:11)")
-	fmt.Println("  - (t)ranslate the latest verse requested")
-	fmt.Println("  - (s)how text for the latest verse again")
-	fmt.Println("  - search rabble - search for the given word 'rabble'")
-	fmt.Println("                  - may not return all matches if too many verses")
-	fmt.Println("                  - use quotes around phrases to limit search results")
-	fmt.Println("  - a strongs number prefixed by 'g' (for greek)   e.g. g2222")
-	fmt.Println("  - a strongs number prefixed by 'h' (for hebrew)  e.g. h5555")
-	fmt.Println("  - <strongs-num> search epistles    - searches on strongs num")
-	fmt.Println("  - (p)roverb prints a random proverb")
-	fmt.Println("  - (d)eclaration - WIP - displays a random line from your declarations file")
-	fmt.Println("  - (q)uit or e(x)it")
+	fmt.Println("  a verse e.g. Ps3.3 or James 4:11")
+	fmt.Println("  t - translate the latest verse requested")
+	fmt.Println("  s - show text for the latest verse again")
+	fmt.Println("  search rabble - search for the word 'rabble'")
+	fmt.Println("                - may not return all matches if too many verses")
+	fmt.Println("                - use quotes around phrases to limit search results")
+	fmt.Println("  g<strongs> - strongs number prefixed by 'g' (for greek)   e.g. g2222")
+	fmt.Println("  h<strongs> - strongs number prefixed by 'h' (for hebrew)  e.g. h5555")
+	fmt.Println("  g<strongs> search epistles - searches on strongs num")
+	fmt.Println("  p - proverb - prints a random proverb")
+	fmt.Println("  d - declaration - displays a random line from your declarations file")
+	fmt.Println("  pd - print all declarations as printable pdf")
+	fmt.Println("  q - quit or x - exit")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  > 2Tim 1.7             (shows text for 2 Tim 1:7)")
