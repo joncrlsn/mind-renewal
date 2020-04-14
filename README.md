@@ -2,7 +2,16 @@
 
 This command-line app was written to help me renew my mind to truths in scripture by studying the bible with a command-line-interface.
 
-For most people, instead of this app, I would recommend the free https://www.stepbible.org with the ESV translation.  Like this, there are no commentaries, but it has many easily viewed cross-references and Greek and Hebrew helps.
+For most people, instead of this app, I would recommend the free https://www.stepbible.org with the ESV translation.  Like this, there are no commentaries, but it has many easily viewed cross-references and Greek and Hebrew helps.  Biblehub.com also has helps for the original languages
+
+## Features
+
+* Lookup single or multiple verses in the ESV translation.
+* Show the ESV words next to the Strongs Greek or Hebrew translation numbers.
+* Lookup definitions of Strongs translation numbers.
+* Search for other verses that use a given Strongs number.
+* Display declarations, which are verses that you have personalized to help you renew your mind to the truths inside.
+* Print your declarations for offline review and study.
 
 All Scripture quotations, unless otherwise indicated, are taken from The Holy Bible, English Standard Version. Copyright ©2001 by Crossway Bibles, a publishing ministry of Good News Publishers.
 
