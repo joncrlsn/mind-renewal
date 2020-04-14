@@ -1,8 +1,8 @@
-# Bible Study CLI
+# Mind-Renewal Bible Study CLI
 
-This command-line app is for people like me who prefer to study the bible with a command-line-interface. I would appreciate suggestions of easy ways to make this more user-friendly.
+This command-line app was written to help me renew my mind to truths in scripture by studying the bible with a command-line-interface.
 
-If you prefer a web interface, I recommend the free https://www.stepbible.org with the ESV translation.  Like this, there are no commentaries, but it has many easily viewed cross-references and Greek and Hebrew helps.
+For most people, instead of this app, I would recommend the free https://www.stepbible.org with the ESV translation.  Like this, there are no commentaries, but it has many easily viewed cross-references and Greek and Hebrew helps.
 
 All Scripture quotations, unless otherwise indicated, are taken from The Holy Bible, English Standard Version. Copyright ©2001 by Crossway Bibles, a publishing ministry of Good News Publishers.
 
