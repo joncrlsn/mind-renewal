@@ -111,7 +111,8 @@ func (t Testament) String() string {
 func init() {
 
 	for _, book := range books {
-		bookNameMap[book.FullName] = book
+		fullNameLower := strings.ToLower(book.FullName)
+		bookNameMap[fullNameLower] = book
 		for _, aliasName := range book.Aliases {
 			bookNameMap[aliasName] = book
 			filters[aliasName] = append(filters[aliasName], book.TranslationName)

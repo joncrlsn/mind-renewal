@@ -124,7 +124,7 @@ func mainPrompt() {
 		color.FgDarkGray.Printf("Current verse: %s", previousPassageRef)
 		color.Cyan.Println("  (t)ranslate or (s)how it again")
 	}
-	color.Cyan.Println("Enter verse reference, strongs# (i.e. g4982 or h3068), (p)roverb, (h)elp or (q)uit.")
+	color.Cyan.Println("Enter verse reference, strongs# (i.e. g4982 or h3068), (p)roverb, (d)eclaration, (h)elp or (q)uit.")
 	color.Magenta.Print(" > ")
 	text, err := reader.ReadString('\n')
 	if err != nil {

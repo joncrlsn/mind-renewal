@@ -54,14 +54,14 @@ func translate(verseRef string) {
 	} else {
 
 		// Parse the book name and chapter-verse sections from the verse reference
-		singleVerseFormat := regexp.MustCompile(`^([0-9\s]*[^0-9]+)([0-9]+:?[0-9]*)`)
+		singleVerseFormat := regexp.MustCompile(`^([0-9\s]*[^0-9]+)([0-9]+:?[0-9]*).*`)
 		book := singleVerseFormat.ReplaceAllString(verseRef, "$1")
 		chapterVerse := singleVerseFormat.ReplaceAllString(verseRef, "$2")
 		bookTrimmed := strings.TrimSpace(book)
 
 		//fmt.Printf("book: '%s'\n", book)
 		//fmt.Printf("chapterVerse: '%s'\n", chapterVerse)
-		bookObj, ok := bookNameMap[bookTrimmed]
+		bookObj, ok := bookNameMap[strings.ToLower(bookTrimmed)]
 		if !ok {
 			displayErrorText("Unable to find book with name " + bookTrimmed)
 			return
