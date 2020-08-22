@@ -81,7 +81,7 @@ func displayPassage(passageRef string, includeHeadings, includeFootnotes, indent
 // Example verseRef values that will work:
 //    romans 12:1
 //    2Tim1:13
-//    Psalm 3:3,Isaiah 53:5
+//    Psalm 3:3 Isaiah 53:5
 //    ps 119:9, 11
 //    1 Thess 5:16-18
 func lookupVerse(verseRef string, lineLength int, includeHeadings, includeFootnotes, indentPoetry, includeVerseNumbers bool) (*Passage, error) {

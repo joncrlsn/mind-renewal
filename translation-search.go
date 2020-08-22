@@ -116,7 +116,7 @@ func searchStrongsWord(searchString string) error {
 	// Lookup all the verses that use the given strongs number
 	//
 
-	versesLookupString := strings.Join(verses, ",")
+	versesLookupString := strings.Join(verses, " ")
 	//versesLookupString = strings.ReplaceAll(versesLookupString, ":", ".")
 	//versesLookupString = strings.ReplaceAll(versesLookupString, " ", "")
 	fmt.Printf("Verses lookup string: %s\n", versesLookupString)

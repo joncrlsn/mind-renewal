@@ -23,9 +23,9 @@ and I personalized it as a declaration with:
 
     "I count as a loss the things that I once thought mattered."
 
-All Scripture quotations, unless otherwise indicated, are taken from The Holy Bible, English Standard Version. Copyright ©2001 by Crossway Bibles, a publishing ministry of Good News Publishers.
-
 ## Data comes from
+
+All Scripture quotations, unless otherwise indicated, are taken from The Holy Bible, English Standard Version. Copyright ©2001 by Crossway Bibles, a publishing ministry of Good News Publishers.
 
 * [English Standard Version API](https://api.esv.org/)
 * ESV Translation File:
